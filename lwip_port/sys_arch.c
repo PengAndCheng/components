@@ -40,6 +40,8 @@
 #include "semphr.h"
 #include "task.h"
 
+#include "arch/sys_arch.h"
+
 /** Set this to 1 if you want the stack size passed to sys_thread_new() to be
  * interpreted as number of stack words (FreeRTOS-like).
  * Default is that they are interpreted as byte count (lwIP-like).
