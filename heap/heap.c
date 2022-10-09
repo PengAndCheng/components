@@ -21,8 +21,8 @@
 //一个新空闲块最小尺寸 这里是xHeapStructSize的两倍
 #define heapMINIMUM_BLOCK_SIZE    ( ( size_t ) ( xHeapStructSize << 1 ) )
 
-//xBlockSize的高位掩码使用了这个值进行初始化，其大小决定了最小申请尺寸的大小 如果是8最大申请尺寸就是127，自己解读源码理解的，网上未看到说明 后改16就是32767
-#define heapBITS_PER_BYTE         ( ( size_t ) 16 )
+//xBlockSize的高位掩码使用了这个值进行初始化，其大小决定了最小申请尺寸的大小 如果是8X4最大申请尺寸还是很大的，自己解读源码理解的
+#define heapBITS_PER_BYTE         ( ( size_t ) 8 )
 
 #ifdef MUL_NON
 //堆内存空间数组
@@ -35,7 +35,7 @@ static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 static void prvInsertBlockIntoFreeList( Heap_t* heap, BlockLink_t * pxBlockToInsert ) /*PRIVILEGED_FUNCTION*/;
 
 //初始化堆内存 主要理解 xStart pxFirstFreeBlock pxEnd
-static void prvHeapInit( Heap_t* heap );
+static void HeapInit( Heap_t* heap );
 
 //位于每个分配内存开头的结构的大小 块必须正确对齐字节。
 static const size_t xHeapStructSize = ( sizeof( BlockLink_t ) + ( ( size_t ) ( portBYTE_ALIGNMENT - 1 ) ) ) & ~( ( size_t ) portBYTE_ALIGNMENT_MASK );
@@ -52,7 +52,7 @@ static size_t xNumberOfSuccessfulFrees = 0;         //表示成功释放一次�
 #endif /* #ifdef MUL_NON */
 
 //xBlockSize的高位掩码，在初始化函数中使用heapBITS_PER_BYTE进行初始化
-static size_t xBlockAllocatedBit = 0;   //第heapBITS_PER_BYTE（从0开始）位（高位）设为了1 和xBlockSize heapBITS_PER_BYTE关系很大
+static size_t xBlockAllocatedBit = 0;   //第heapBITS_PER_BYTE * 4（从0开始）位（高位）设为了1 和xBlockSize heapBITS_PER_BYTE关系很大
 
 
 
@@ -87,7 +87,7 @@ static size_t xBlockAllocatedBit = 0;   //第heapBITS_PER_BYTE（从0开始）�
 /*-----------------------------------------------------------*/
 
 static
-void * pvPortMalloc( Heap_t* heap, size_t xWantedSize )
+void * PortMalloc( Heap_t* heap, size_t xWantedSize )
 {
     BlockLink_t * pxBlock, * pxPreviousBlock, * pxNewBlockLink;
     void * pvReturn = NULL;
@@ -100,7 +100,7 @@ void * pvPortMalloc( Heap_t* heap, size_t xWantedSize )
                  * 初始化以设置空闲块列表*/
         if( heap->pxEnd == NULL )
         {
-            prvHeapInit(heap);//pxEnd数据区在尾端，所以可以使用null来判断初始化
+            HeapInit(heap);//pxEnd数据区在尾端，所以可以使用null来判断初始化
         }
         else
         {
@@ -251,7 +251,7 @@ void * pvPortMalloc( Heap_t* heap, size_t xWantedSize )
 /*-----------------------------------------------------------*/
 
 static
-void vPortFree( Heap_t* heap, void * pv )
+void PortFree( Heap_t* heap, void * pv )
 {
     uint8_t * puc = ( uint8_t * ) pv;
     BlockLink_t * pxLink;
@@ -298,6 +298,8 @@ void vPortFree( Heap_t* heap, void * pv )
         }
     }
 }
+
+#ifdef USE_XXX
 /*-----------------------------------------------------------*/
 static
 size_t xPortGetFreeHeapSize( Heap_t* heap )
@@ -317,8 +319,9 @@ void vPortInitialiseBlocks( void )
     /* This just exists to keep the linker quiet. */
 }
 /*-----------------------------------------------------------*/
+#endif /* #ifdef USE_XXX */
 
-static void prvHeapInit( Heap_t* heap ) /* PRIVILEGED_FUNCTION */
+static void HeapInit( Heap_t* heap ) /* PRIVILEGED_FUNCTION */
 {
     BlockLink_t * pxFirstFreeBlock;
     uint8_t * pucAlignedHeap;                       //对齐后的堆内存地址变量
@@ -364,7 +367,7 @@ static void prvHeapInit( Heap_t* heap ) /* PRIVILEGED_FUNCTION */
     heap->xFreeBytesRemaining = pxFirstFreeBlock->xBlockSize;                     //表示内存堆剩余大小
 
     /* Work out the position of the top bit in a size_t variable. */
-    xBlockAllocatedBit = ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 );//第八位为1 意义何为？
+    xBlockAllocatedBit = ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 );//第4X8=32位为1 意义何为？
 }
 /*-----------------------------------------------------------*/
 
@@ -564,21 +567,21 @@ void heap_cfg(void){
         heap->xMinimumEverFreeBytesRemaining = 0;                        \
         heap->xNumberOfSuccessfulAllocations = 0;                        \
         heap->xNumberOfSuccessfulFrees = 0;                              \
-        prvHeapInit(heap);                      \
+        HeapInit(heap);                      \
         };
 #include "heap_std.h"
 #undef HEAP_CFG
 
 #define HEAP_CFG(namestr,   name,   size) void * name##_malloc(unsigned int xWantedSize){  \
         Heap_t* heap = &heap_arr[HEAP_##name];  \
-        return pvPortMalloc(heap,xWantedSize);  \
+        return PortMalloc(heap,xWantedSize);  \
         };
 #include "heap_std.h"
 #undef HEAP_CFG
 
 #define HEAP_CFG(namestr,   name,   size) void name##_free(void * pv){  \
         Heap_t* heap = &heap_arr[HEAP_##name];  \
-        vPortFree(heap,pv);  \
+        PortFree(heap,pv);  \
         };
 #include "heap_std.h"
 #undef HEAP_CFG
