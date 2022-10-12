@@ -53,6 +53,7 @@
 /** Set this to 1 to use a mutex for SYS_ARCH_PROTECT() critical regions.
  * Default is 0 and locks interrupts/scheduler for SYS_ARCH_PROTECT().
  */
+//将其设置为1，以对SYS_ARCH_PROTECT（）关键区域使用互斥。默认值为0，并锁定SYS_ARCH_PROTECT（）的中断/调度程序。
 #ifndef LWIP_FREERTOS_SYS_ARCH_PROTECT_USES_MUTEX
 #define LWIP_FREERTOS_SYS_ARCH_PROTECT_USES_MUTEX     0
 #endif

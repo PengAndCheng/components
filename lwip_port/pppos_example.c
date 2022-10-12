@@ -36,6 +36,7 @@
 #if PPPOS_SUPPORT
 #include "netif/ppp/pppos.h"
 #include "lwip/sio.h"
+#include "netif/ppp/ppp.h"
 #define PPP_PTY_TEST 1
 #endif /* PPPOS_SUPPORT */
 

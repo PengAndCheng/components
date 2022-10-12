@@ -37,10 +37,12 @@
 #ifndef LWIP_HDR_ARCH_H
 #define LWIP_HDR_ARCH_H
 
+//little endian 小段模式
 #ifndef LITTLE_ENDIAN
 #define LITTLE_ENDIAN 1234
 #endif
 
+//big endian  大端模式
 #ifndef BIG_ENDIAN
 #define BIG_ENDIAN 4321
 #endif
@@ -63,11 +65,13 @@
  * Needed for conversion of network data to host byte order.
  * Allowed values: LITTLE_ENDIAN and BIG_ENDIAN
  */
+//如果没有定义字节顺序就定义为小段模式 和平台相关
 #ifndef BYTE_ORDER
 #define BYTE_ORDER LITTLE_ENDIAN
 #endif
 
 /** Define random number generator function of your system */
+//定义系统的随机数生成器功能
 #ifdef __DOXYGEN__
 #define LWIP_RAND() ((u32_t)rand())
 #endif
@@ -77,6 +81,8 @@
  * in turn pull in a lot of standard libary code. In resource-constrained 
  * systems, this should be defined to something less resource-consuming.
  */
+//Debug调试宏作用在于，可以在代码运行过程中返回出错信息。
+//当出现错误时，通过打印功能，将错误代码的文件名及其在文件名中的行号打印出来已达到调试代码的作用。这个功能在大型开源项目里面经常运用到，因为一些逻辑错误是很难查找出来的。
 #ifndef LWIP_PLATFORM_DIAG
 #define LWIP_PLATFORM_DIAG(x) do {printf x;} while(0)
 #include <stdio.h>
@@ -88,6 +94,7 @@
  * in turn pull in a lot of standard libary code. In resource-constrained 
  * systems, this should be defined to something less resource-consuming.
  */
+//lwip的断言方法
 #ifndef LWIP_PLATFORM_ASSERT
 #define LWIP_PLATFORM_ASSERT(x) do {printf("Assertion \"%s\" failed at line %d in %s\n", \
                                      x, __LINE__, __FILE__); fflush(NULL); abort();} while(0)
@@ -99,6 +106,7 @@
  * include stddef.h header to get size_t. You need to typedef size_t
  * by yourself in this case.
  */
+//通过定义这个来包含stddef.h获取size_t的尺寸 这里包含stddef.h所以cc.h中没有声明类型
 #ifndef LWIP_NO_STDDEF_H
 #define LWIP_NO_STDDEF_H 0
 #endif
@@ -111,6 +119,7 @@
  * the stdint.h header. You need to typedef the generic types listed in
  * lwip/arch.h yourself in this case (u8_t, u16_t...).
  */
+//包含stdint.h来获取平台字节数据类型
 #ifndef LWIP_NO_STDINT_H
 #define LWIP_NO_STDINT_H 0
 #endif
@@ -119,6 +128,7 @@
 #if !LWIP_NO_STDINT_H
 #include <stdint.h>
 /* stdint.h is C99 which should also provide support for 64-bit integers */
+//c99库中有UINT64_MAX，但是没有私有定义LWIP_HAVE_INT64 所以将LWIP_HAVE_INT64定位1 但是本MCU平台不是64位的 实际使用不要用64位的变量
 #if !defined(LWIP_HAVE_INT64) && defined(UINT64_MAX)
 #define LWIP_HAVE_INT64 1
 #endif
@@ -139,11 +149,13 @@ typedef uintptr_t mem_ptr_t;
  * the inttypes.h header. You need to define the format strings listed in
  * lwip/arch.h yourself in this case (X8_F, U16_F...).
  */
+//inttypes.h是标准C函数库的头文件，提供整数输入的各种转换宏。
 #ifndef LWIP_NO_INTTYPES_H
 #define LWIP_NO_INTTYPES_H 0
 #endif
 
 /* Define (sn)printf formatters for these lwIP types */
+//!LWIP_NO_INTTYPES_H=1 本平台有这个宏的
 #if !LWIP_NO_INTTYPES_H
 #include <inttypes.h>
 #ifndef X8_F
@@ -176,6 +188,7 @@ typedef uintptr_t mem_ptr_t;
  * the limits.h header. You need to define the type limits yourself in this case
  * (e.g. INT_MAX, SSIZE_MAX).
  */
+//limits.h 头文件决定了各种变量类型的各种属性。定义在该头文件中的宏限制了各种变量类型（比如 char、int 和 long）的值。这些限制指定了变量不能存储任何超出这些限制的值，例如一个无符号可以存储的最大值是 255。
 #ifndef LWIP_NO_LIMITS_H
 #define LWIP_NO_LIMITS_H 0
 #endif
@@ -190,6 +203,7 @@ typedef uintptr_t mem_ptr_t;
  * sys/types or unistd.h are available).
  * Being like that, we define it to 'int' if SSIZE_MAX is not defined.
  */
+//限制ssize_t大小
 #ifdef SSIZE_MAX
 /* If SSIZE_MAX is defined, unistd.h should provide the type as well */
 #ifndef LWIP_NO_UNISTD_H
@@ -211,6 +225,7 @@ typedef int ssize_t;
  * are mapped to the appropriate functions (lwip_islower, lwip_isdigit...), if
  * not, a private implementation is provided.
  */
+//ctype.h是C标准函数库中的头文件，定义了一批C语言字符分类函数（C character classification functions），用于测试字符是否属于特定的字符类别，如字母字符、控制字符等等。
 #ifndef LWIP_NO_CTYPE_H
 #define LWIP_NO_CTYPE_H 0
 #endif
@@ -236,11 +251,13 @@ typedef int ssize_t;
 #endif
 
 /** C++ const_cast<target_type>(val) equivalent to remove constness from a value (GCC -Wcast-qual) */
+//(target_type)(signed int(val)) 先把变量扩充的有符号32位（本平台ptrdiff_t为32位），再转成相应的类型，
 #ifndef LWIP_CONST_CAST
 #define LWIP_CONST_CAST(target_type, val) ((target_type)((ptrdiff_t)val))
 #endif
 
 /** Get rid of alignment cast warnings (GCC -Wcast-align) */
+//将变量以转换的方式对齐
 #ifndef LWIP_ALIGNMENT_CAST
 #define LWIP_ALIGNMENT_CAST(target_type, val) LWIP_CONST_CAST(target_type, val)
 #endif
@@ -248,11 +265,13 @@ typedef int ssize_t;
 /** Get rid of warnings related to pointer-to-numeric and vice-versa casts,
  * e.g. "conversion from 'u8_t' to 'void *' of greater size"
  */
+//消除对齐强制转换警告（GCC-Wcast align）
 #ifndef LWIP_PTR_NUMERIC_CAST
 #define LWIP_PTR_NUMERIC_CAST(target_type, val) LWIP_CONST_CAST(target_type, val)
 #endif
 
 /** Avoid warnings/errors related to implicitly casting away packed attributes by doing a explicit cast */
+//Avoid warnings/errors related to implicitly casting away packed attributes by doing a explicit cast
 #ifndef LWIP_PACKED_CAST
 #define LWIP_PACKED_CAST(target_type, val) LWIP_CONST_CAST(target_type, val)
 #endif
@@ -267,6 +286,7 @@ typedef int ssize_t;
  * or more portable:\n
  * \#define LWIP_DECLARE_MEMORY_ALIGNED(variable_name, size) u32_t variable_name[(size + sizeof(u32_t) - 1) / sizeof(u32_t)]
  */
+///* 定义全局数组作为内存堆的内存，LwIP就是实现的如何管理这块内存的。这块内存时经过对其操作的 需满足字节对齐而不溢出*/
 #ifndef LWIP_DECLARE_MEMORY_ALIGNED
 #define LWIP_DECLARE_MEMORY_ALIGNED(variable_name, size) u8_t variable_name[LWIP_MEM_ALIGN_BUFFER(size)]
 #endif
@@ -275,6 +295,7 @@ typedef int ssize_t;
  * multiple of MEM_ALIGNMENT (e.g. LWIP_MEM_ALIGN_SIZE(3) and
  * LWIP_MEM_ALIGN_SIZE(4) will both yield 4 for MEM_ALIGNMENT == 4).
  */
+///* 数据占用空间大小对齐计算 opt中MEM_ALIGNMENT默认为1 需要自己定义MEM_ALIGNMENT*/
 #ifndef LWIP_MEM_ALIGN_SIZE
 #define LWIP_MEM_ALIGN_SIZE(size) (((size) + MEM_ALIGNMENT - 1U) & ~(MEM_ALIGNMENT-1U))
 #endif
@@ -283,6 +304,7 @@ typedef int ssize_t;
  * type as storage. This includes a safety-margin on (MEM_ALIGNMENT - 1) at the
  * start (e.g. if buffer is u8_t[] and actual data will be u32_t*)
  */
+//想要内存+字节对齐-1，必定满足字节对齐而不溢出
 #ifndef LWIP_MEM_ALIGN_BUFFER
 #define LWIP_MEM_ALIGN_BUFFER(size) (((size) + MEM_ALIGNMENT - 1U))
 #endif
@@ -290,6 +312,7 @@ typedef int ssize_t;
 /** Align a memory pointer to the alignment defined by MEM_ALIGNMENT
  * so that ADDR % MEM_ALIGNMENT == 0
  */
+//将指针指向对齐的地址
 #ifndef LWIP_MEM_ALIGN
 #define LWIP_MEM_ALIGN(addr) ((void *)(((mem_ptr_t)(addr) + MEM_ALIGNMENT - 1) & ~(mem_ptr_t)(MEM_ALIGNMENT-1)))
 #endif
@@ -303,8 +326,9 @@ extern "C" {
   * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
   * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
   */
+ //同类以下是压缩结构体相关 结构体不进行字节对齐就需要此类操作了
 #ifndef PACK_STRUCT_BEGIN
-#define PACK_STRUCT_BEGIN
+#define PACK_STRUCT_BEGIN __packed
 #endif /* PACK_STRUCT_BEGIN */
 
 /** Packed structs support.
@@ -369,6 +393,7 @@ extern "C" {
 #endif
 
 /** Eliminates compiler warning about unused arguments (GCC -Wextra -Wunused). */
+//消除编译器关于未使用参数的警告（GCC-Wextra-Wunused）
 #ifndef LWIP_UNUSED_ARG
 #define LWIP_UNUSED_ARG(x) (void)x
 #endif /* LWIP_UNUSED_ARG */
@@ -378,9 +403,11 @@ extern "C" {
  * define LWIP_ERRNO_STDINCLUDE to get <errno.h> included or
  * define LWIP_ERRNO_INCLUDE to <errno.h> or equivalent.
  */
+//LWIP_PROVIDE_ERRNO==1：让LWIP提供ERRNO值和“ERRNO”变量。这个__DOXYGEN__（编程辅助工具）是不可能定义1的 ，定义会使用所有默认
 #if defined __DOXYGEN__
-#define LWIP_PROVIDE_ERRNO
+//#define LWIP_PROVIDE_ERRNO 这句放在lwipopts.h中定义1 在lwipopts.h定义变量
 #endif
+
 
 /**
  * @}

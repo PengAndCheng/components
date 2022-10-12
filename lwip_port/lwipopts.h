@@ -3,21 +3,73 @@
 #define _LWIPOPTS_H
 
 
+//本文件和arch.h 和cc.h 都有可能重复定义
+
 /***************************************************************************************************************/
 //                                      NO_SYS 操作系统相关
 /***************************************************************************************************************/
-/*
-    NO_SYS == 1: 无操作系统，无法使用线程安全相关API，只能使用callback-style raw API
-                 须要注意不能一次从多个上下文访问lwIP函数/结构 
-    NO_SYS == 0: 有操作系统
-*/
+//NO_SYS == 1: 无操作系统，无法使用线程安全相关API，只能使用callback-style raw API 须要注意不能一次从多个上下文访问lwIP函数/结构 
+//NO_SYS == 0: 有操作系统
 #define NO_SYS        0
+
+/***************************************************************************************************************/
+//                                      Heap and memory pools
+/***************************************************************************************************************/
+//MEM_LIBC_MALLOC==1: 使用C库提供的malloc / free / realloc而不是lwip内部分配器。一般情况，C库的分配策略碎片化比较严重，不适用于嵌入式    
+#define 	MEM_LIBC_MALLOC   0
+//MEMP_MEM_MALLOC == 1：使用mem_malloc/mem_free而不是lwip内存池分配器。（堆分配可能比池分配慢得多）与MEM_USE_POOLS只能选择其一
+#define 	MEMP_MEM_MALLOC   0
+//字节对齐 老重要了
+#define 	MEM_ALIGNMENT     4
+//MEM_SIZE：堆内存的大小。 如果应用程序将发送大量需要复制的数据，则应将其设置为高。
+#define 	MEM_SIZE   1600
+
+//内存池溢出检查 0： 不检查 1： 释放时检查 2：调用memp_malloc() or memp_free() 检查，有用，但很慢
+#define 	MEMP_OVERFLOW_CHECK   0
+//内存池健全性检查 MEMP_SANITY_CHECK == 1：在每个memp_free（）之后运行一次健全性检查，以确保链表中没有循环。
+#define 	MEMP_SANITY_CHECK   0
+
+//堆内存溢出检查 0: 不检查 1： 释放时检查2：调用mem_malloc() or mem_free() 检查，有用，但很慢
+#define 	MEM_OVERFLOW_CHECK   0
+//堆内存健全性检查
+#define 	MEM_SANITY_CHECK    0
+//内存堆分配策略（是否用内存池分配策略实现内存堆分配） MEM_USE_POOLS==1: 使用内存池方式，还必须启用MEMP_USE_CUSTOM_POOLS。与MEMP_MEM_MALLOC只能选择其一
+#define 	MEM_USE_POOLS   0
+//MEM_USE_POOLS_TRY_BIGGER_POOL== 1：如果一个malloc_pool为空，请尝试下一个更大的池 - 警告：这个可能的废物存储器，但它可以使系统更可靠。
+#define 	MEM_USE_POOLS_TRY_BIGGER_POOL   0
+//MEMP_USE_CUSTOM_POOLS== 1：是否包含用户文件lwippools.h，该文件定义了lwIP所需的“标准”之外的其他池。如果将其设置为1，则必须在包含路径中的某个位置使用lwippools.h。
+#define 	MEMP_USE_CUSTOM_POOLS   0
+/*这个宏定义设置为 1 可以从中断（或其它需要立即响应的信号中） 释放 PBUF_RAM 的pbufs
+  设置为1 时， mem_malloc 会被 semaphore 与 SYS_ARCH_PROTECT保护                                                                                          mem_free只会使用SYS_ARCH_PROTECT
+  如果不希望这样，在拥有操作系统的情况下，卡可以使用
+  pbuf_free_callback(p);
+  mem_free_callback(m);
+*/
+#define 	LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT   0
 
 /***************************************************************************************************************/
 //                                      PPP
 /***************************************************************************************************************/
 //PPP示例
 #define PPPOS_SUPPORT        1
+#define PPP_SUPPORT          1
+
+
+//没有以太网 暂时关闭
+#define LWIP_ETHERNET        0
+//没有以太网就没有APR
+#define LWIP_ARP             0
+
+//LWIP_PROVIDE_ERRNO==1：让LWIP提供ERRNO值和“ERRNO”变量。这个__DOXYGEN__（编程辅助工具）是不可能定义1的 ，定义会使用所有默认
+#define LWIP_PROVIDE_ERRNO   1
+//提供 int errno 不在头文件中 在lwipopts.c中
+/*
+#if LWIP_PROVIDE_ERRNO
+    int errno;
+#endif
+*/
+
+
 
 
 #ifdef USE_XXX
@@ -1149,7 +1201,6 @@
 /***************************************************************************************************************/
 //                                      其它
 /***************************************************************************************************************/
-//让lwIP提供ERRNO值和'errno'变量。 如果禁用此选项,cc.h必须定义'errno',include <errno.h>
-#define LWIP_PROVIDE_ERRNO 1	
+
 
 #endif /* _LWIPOPTS_H */
