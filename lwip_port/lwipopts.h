@@ -70,7 +70,25 @@
 */
 
 
+//lwip中有些示例采用这个宏来建立线程大小和线程等级 如pppos_example，可在文件中自行更改
+#define DEFAULT_THREAD_STACKSIZE 260
+#define DEFAULT_THREAD_PRIO      14
+//在tcpip_init函数中用到的宏
+#define TCPIP_MBOX_SIZE         32
+#define TCPIP_THREAD_STACKSIZE  2048
+#define TCPIP_THREAD_PRIO       12
 
+//使用RAW API 写ping命令
+#define LWIP_RAW    1
+//需要域名解析 开启DNS
+#define LWIP_DNS    1
+//使用DNS需要随机数
+#define LWIP_RAND() ((u32_t)rand())
+
+//debug总开关
+#define LWIP_DEBUG          1
+//debug分开关PPP
+#define PPP_DEBUG            LWIP_DBG_ON
 
 #ifdef USE_XXX
 

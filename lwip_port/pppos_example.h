@@ -36,6 +36,8 @@ extern "C" {
 
 void pppos_example_init(void);
 
+void pppos_example_connect(void);
+
 #ifdef __cplusplus
 }
 #endif

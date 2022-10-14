@@ -42,6 +42,8 @@
 
 #include "pppos_example.h"
 
+#include "lwip/netif.h"
+
 #if PPPOS_SUPPORT
 static sio_fd_t ppp_sio;
 static ppp_pcb *ppp;
@@ -209,12 +211,21 @@ pppos_example_init(void)
   ppp_set_auth(ppp, PPPAUTHTYPE_CHAP, "lwip", "mysecret");
 #endif
 
-  ppp_connect(ppp, 0);
+  sys_thread_new("pppos_rx_thread", pppos_rx_thread, NULL, 1024*2, 4);
+  //ppp_connect(ppp, 0);
+  printf("pppos_example_init end;\n");//ppp_connect没有穿件线程却能运行到这里？
+  pppos_netif.name[0]='e';
+  pppos_netif.name[1]='c';
+  netif_set_default(&pppos_netif);
 
 #if LWIP_NETIF_STATUS_CALLBACK
   netif_set_status_callback(&pppos_netif, netif_status_callback);
 #endif /* LWIP_NETIF_STATUS_CALLBACK */
 
-  sys_thread_new("pppos_rx_thread", pppos_rx_thread, NULL, DEFAULT_THREAD_STACKSIZE, DEFAULT_THREAD_PRIO);
+  //sys_thread_new("pppos_rx_thread", pppos_rx_thread, NULL, 512, 8);
 #endif /* PPPOS_SUPPORT */
+}
+
+void pppos_example_connect(void){
+    ppp_connect(ppp, 0);
 }
