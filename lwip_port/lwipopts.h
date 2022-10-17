@@ -71,7 +71,7 @@
 
 
 //lwip中有些示例采用这个宏来建立线程大小和线程等级 如pppos_example，可在文件中自行更改
-#define DEFAULT_THREAD_STACKSIZE 260
+#define DEFAULT_THREAD_STACKSIZE 512
 #define DEFAULT_THREAD_PRIO      14
 //在tcpip_init函数中用到的宏
 #define TCPIP_MBOX_SIZE         32
@@ -88,7 +88,16 @@
 //debug总开关
 #define LWIP_DEBUG          1
 //debug分开关PPP
-#define PPP_DEBUG            LWIP_DBG_ON
+#define PPP_DEBUG            LWIP_DBG_OFF
+
+//这一堆邮箱默认是0 这里不配置就有难以寻找的断言 邮箱的创建都是跟随着线程的创建
+#define DEFAULT_RAW_RECVMBOX_SIZE 3
+#define DEFAULT_UDP_RECVMBOX_SIZE 3
+#define DEFAULT_TCP_RECVMBOX_SIZE 3
+#define DEFAULT_ACCEPTMBOX_SIZE 3
+
+//lwip_setsockopt中操作的各种功能
+#define LWIP_SO_RCVTIMEO 1
 
 #ifdef USE_XXX
 

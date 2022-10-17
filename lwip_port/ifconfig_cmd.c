@@ -39,6 +39,7 @@ static BaseType_t ifconfigCmd( char *pcWriteBuffer, size_t xWriteBufferLen, cons
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
+    pcWriteBuffer[0]=0;
 
 	if( uxParameterNumber == 0 )
 	{
