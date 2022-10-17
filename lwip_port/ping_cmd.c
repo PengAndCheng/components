@@ -30,13 +30,15 @@ static BaseType_t pingCmd( char *pcWriteBuffer, size_t xWriteBufferLen, const ch
 							uxParameterNumber,		/* Return the next parameter. */
 							&xParameterStringLength	/* Store the parameter string length. */
 						);
-
-        ip4_addr_t addr;
-        ip4addr_aton(pcParameter,&addr);
-        printf("ping_init start:\r\n");
-        ping_init(&addr);
-        
-
+        if (pcParameter[0]=='x')
+        {
+            ping_end();
+        }else{
+            static ip4_addr_t addr;//ping中线程是用指针指向这个地址的，所以用static
+            ip4addr_aton(pcParameter,&addr);
+            printf("ping_init start:\r\n");
+            ping_init(&addr);
+        }
         uxParameterNumber = 0;
         xReturn = pdFALSE;
         return xReturn;

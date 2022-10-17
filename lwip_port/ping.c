@@ -236,6 +236,10 @@ ping_recv(int s)
   PING_RESULT(0);
 }
 
+
+#include "FreeRTOS.h"
+static int pingend = 0;
+static sys_thread_t th;
 static void
 ping_thread(void *arg)
 {
@@ -269,6 +273,11 @@ ping_thread(void *arg)
   LWIP_UNUSED_ARG(ret);
 
   while (1) {
+    if (pingend == 1)
+    {
+       break;
+    }
+    
     if (ping_send(s, ping_target) == ERR_OK) {
       LWIP_DEBUGF( PING_DEBUG, ("ping: send "));
       ip_addr_debug_print(PING_DEBUG, ping_target);
@@ -285,6 +294,12 @@ ping_thread(void *arg)
     }
     sys_msleep(PING_DELAY);
   }
+
+  printf("ping lwip_close.\r\n");
+  lwip_close(s);
+  //freeRTOS API
+  
+  vTaskDelete(th.thread_handle);
 }
 
 #else /* PING_USE_SOCKETS */
@@ -384,13 +399,18 @@ ping_send_now(void)
 void
 ping_init(const ip_addr_t* ping_addr)
 {
+  pingend = 0;
   ping_target = ping_addr;
 
 #if PING_USE_SOCKETS
-  sys_thread_new("ping_thread", ping_thread, NULL, DEFAULT_THREAD_STACKSIZE, DEFAULT_THREAD_PRIO);
+  th = sys_thread_new("ping_thread", ping_thread, NULL, DEFAULT_THREAD_STACKSIZE, DEFAULT_THREAD_PRIO);
 #else /* PING_USE_SOCKETS */
   ping_raw_init();
 #endif /* PING_USE_SOCKETS */
+}
+
+void ping_end(void){
+  pingend = 1;
 }
 
 #endif /* LWIP_RAW */

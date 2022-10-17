@@ -12,6 +12,8 @@
 
 void ping_init(const ip_addr_t* ping_addr);
 
+void ping_end(void);
+
 #if !PING_USE_SOCKETS
 void ping_send_now(void);
 #endif /* !PING_USE_SOCKETS */
