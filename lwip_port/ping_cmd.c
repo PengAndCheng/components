@@ -20,8 +20,7 @@ struct raw_pcb *ping_pcb = NULL;
 extern u32_t sys_now(void);
 static void PingCmd_start(struct raw_pcb *pcb);
 static void timeoutHandle(void *arg);
-u8_t  recv_callback(void *arg, struct raw_pcb *pcb, struct pbuf *p, \
-														ip_addr_t *addr);
+u8_t  recv_callback(void *arg, struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *addr);
 void Ping_Init(ip_addr_t* destip)
 {
 #if FUNC_DBG_ON        
@@ -53,11 +52,8 @@ void Ping_Init(ip_addr_t* destip)
     
     PingCmd_start(ping_pcb);
 }
-/*Function_name: 
- *Description:continue a timeout event for ICMP request message.
- *Author: Tiger_zh
- *Date: 2022/03/02/17:03:11
-*/           
+
+
 u8_t recv_callback(void *arg, struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *addr)
 {                   //  p->payload point the IP header/Ethernet frame data field.
 
@@ -125,11 +121,8 @@ u8_t recv_callback(void *arg, struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *ad
     pbuf_free(p);
     return 1;//delete pbuf.
 }
-/*Function_name: 
- *Description:timeout handle for send ICMP request message.
- *Author: Tiger_zh
- *Date: 2022/03/02/17:05:11
-*/
+
+
 static void timeoutHandle(void *arg)
 {
     struct pbuf *icmp_pbuf = NULL;
@@ -173,11 +166,8 @@ static void timeoutHandle(void *arg)
     rtt_cnt = sys_now(); //calculate time of RTT
     pbuf_free(icmp_pbuf);
 }
-/*Function_name: 
- *Description:start command & init
- *Author: Tiger_zh
- *Date: 2022/03/02/16:56:02
-*/
+
+
 void PingCmd_start(struct raw_pcb *pcb)
 {
 #if FUNC_DBG_ON        
@@ -196,7 +186,6 @@ void PingCmd_start(struct raw_pcb *pcb)
 
 #include "FreeRTOS.h"
 #include "FreeRTOS_CLI.h"
-
 
 static BaseType_t pingCmd( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {

@@ -13,7 +13,7 @@
 //delay
 #define PING_DELAY  (1000)   //ping命令请求间隔
 //debug
-#define FUNC_DBG_ON     1
+#define FUNC_DBG_ON     0
 
 
 void pingCmdRegister( void );
