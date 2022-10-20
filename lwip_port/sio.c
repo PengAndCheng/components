@@ -256,6 +256,15 @@ void mobile_network_task(void *pvParameters)
                 //printf("%d->ip: %d.%d.%d.%d ;\n",ep->ip_addr.addr, ep->ip_addr.addr>>24 & 0xff,ep->ip_addr.addr>>16 & 0xff,ep->ip_addr.addr>>8 & 0xff,ep->ip_addr.addr>>0 & 0xff);
             }
 
+
+            //这里可以查询启动与网络相关的 测试阶段放这里 正式放在各自的任务里
+            if (netif_default != NULL && netif_default->ip_addr.addr != 0)
+            {
+                extern void jmqtt_up(void);
+                jmqtt_up();
+            }
+            
+
         }
         
     }
