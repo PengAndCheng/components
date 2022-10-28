@@ -71,7 +71,7 @@
 
 
 //lwip中有些示例采用这个宏来建立线程大小和线程等级 如pppos_example，可在文件中自行更改
-#define DEFAULT_THREAD_STACKSIZE 1024
+#define DEFAULT_THREAD_STACKSIZE 512
 #define DEFAULT_THREAD_PRIO      14
 //在tcpip_init函数中用到的宏
 #define TCPIP_MBOX_SIZE         32
